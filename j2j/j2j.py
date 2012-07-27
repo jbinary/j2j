@@ -14,18 +14,14 @@ from twilix.vcard import VCard, VCardQuery
 from myvcard import WeatherVCardQuery, WeatherVersionQuery
 
 from presence import MyPresence
-from subscribed import SubscribedList
-from weatherbase import WeatherBase
 
-
-class WeatherComponent(TwilixComponent):
+class j2jComponent(TwilixComponent):
     def __init__(self, version, config, cJid):
         TwilixComponent.__init__(self, cJid)
         self.config = config
         self.VERSION = version
         self.startTime = None
         self.subscribed = SubscribedList(config)
-        self.wbase = WeatherBase()
         self.online = []           
 
     def init(self):
@@ -34,21 +30,21 @@ class WeatherComponent(TwilixComponent):
         self.dispatcher.registerHandler((Message, self))
         self.disco = disco.Disco(self.dispatcher)
         self.version = ClientVersion(self.dispatcher,
-                                    'Google Weather transport',
+                                    'j2j transport',
                                     self.VERSION, 'Linux')
         self.version.init(self.disco)
-        self.myvcard = VCardQuery(nickname='gweather',
+        self.myvcard = VCardQuery(nickname='j2j',
                                   jid=self.myjid,
                                   description='\
-Google Weather XMPP translation service')
+Jabber to jabber gateway')
         self.vcard = VCard(self.dispatcher, myvcard=self.myvcard)
         self.vcard.init(self.disco)
         self.disco.init()
         self.getOnline()
-        self.lc = task.LoopingCall(self.updateStatus)
-        self.lc.start(900)
+        #self.lc = task.LoopingCall(self.updateStatus)
+        #self.lc.start(900)
         print 'Connected!'
-
+"""
     def addSubscr(self, from_, to):
         self.subscribed.add_subscr(from_, to)
     
@@ -72,11 +68,6 @@ Google Weather XMPP translation service')
                         )
             self.dispatcher.send(reply)
     
-    def updateStatus(self):
-        for from_, to in self.online:
-            deff = self.wbase.get_condition(to.user)
-            deff.addCallback(self._result, from_, to)
-    
     def _result(self, respond, from_, to):
         reply = Presence(
                           to=from_,
@@ -84,3 +75,4 @@ Google Weather XMPP translation service')
                           status=respond,                          
                         )
         self.dispatcher.send(reply)
+        """
