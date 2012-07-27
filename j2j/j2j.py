@@ -21,7 +21,7 @@ class j2jComponent(TwilixComponent):
         self.config = config
         self.VERSION = version
         self.startTime = None
-        self.subscribed = SubscribedList(config)
+        #self.subscribed = SubscribedList(config)
         self.online = []           
 
     def init(self):
