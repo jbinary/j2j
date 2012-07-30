@@ -1,5 +1,6 @@
 from twilix.register import RegisterQuery
 from twilix import fields
+from twilix import errors
 
 from dbase import UserBase
 
@@ -10,29 +11,33 @@ class RegisterHandler(RegisterQuery):
     base = UserBase('users')
 
     def getHandler(self):
-        from_ = self.iq.from_.bare()
-        if base.keyInBase(from_):
-
+        from_ = self.iq.from_
         reply = RegisterHandler(parent=self.makeResult())
+        if self.base.keyInBase(str(from_.userhost())):
+            reply.username, reply.password = self.base.getUser(
+                                                        str(from_.userhost()))
+            reply.registered = ''
+            return reply
         reply.instructions = 'Enter username and password!'
         reply.username = ''
         reply.password = ''
         return reply
 
     def setHandler(self):
-        from_ = self.iq.from_.bare()
-        if not base.keyInBase(from_):
-            base.addUser(from_, self.username, self.password)
+        from_ = self.iq.from_
+        if not self.base.keyInBase(str(from_.userhost())):
+            if self.aremove:
+                raise errors.RegistrationRequiredException
+            self.base.addUser(str(from_.userhost()),
+                              self.username, self.password)
             reply = RegisterHandler(parent=self.makeResult())
-            reply.registered = ''
             reply.username, reply.password = self.username, self.password
             return reply
         else:
-
-        elif base.userInBase(self.username):
-            raise errors.NotAcceptable('Username already exists')
-        if self.aremove:
-            raise errors.RegistrationRequired
-        print self.username
-        print self.password
+            if self.aremove:
+                self.base.removeUser(str(from_.userhost()))
+                return self.makeResult()
+            self.base.addUser(str(from_.userhost()),
+                              self.username, self.password)
+            return self.makeResult()
         return self.makeResult()
