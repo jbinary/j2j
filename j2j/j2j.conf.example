@@ -3,4 +3,3 @@ jid = ;jid
 host = ;hostname
 port = ;port number
 password = ;password
-basepath = ;path to file with subscribed base

@@ -10,14 +10,14 @@ import sys
 
 from twisted.internet import reactor
 
-import gweather
+import j2j
 
 def info():
     print('\nUsage: main PATH\n\n\tPATH: the path to the configuration \
 file\n')
 
 def main(conf):
-    version = '0.3'
+    version = '0.0'
     config = ConfigParser.ConfigParser()
     config.read(conf)
   
@@ -26,11 +26,10 @@ def main(conf):
         password = config.get('component', 'password')
         host = config.get('component', 'host')
         port = config.get('component', 'port')
-        path = config.get('component', 'basepath')
     except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
         print('\n Wrong configuration file\n')
         return
-    c = gweather.WeatherComponent(version, config, jid)
+    c = j2j.j2jComponent(version, config, jid)
     c.connect(port, password, host)
     reactor.run() 
 
