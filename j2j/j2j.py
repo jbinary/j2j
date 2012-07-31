@@ -1,19 +1,17 @@
 import time
-import os
 
-from twisted.internet import task
 from twisted.internet.defer import Deferred
 
-from twilix.stanzas import Message, Presence, Iq
-from twilix.base.exceptions import WrongElement
+from twilix.stanzas import Presence, Message
 from twilix.version import ClientVersion
-import twilix.disco as disco
+from twilix.disco import Disco
 from twilix.patterns.component import TwilixComponent
 from twilix.dispatcher import Dispatcher
-from registration import RegisterHandler
-from twilix.register import Register
 
 from twilix.vcard import VCard, VCardQuery
+from twilix.register import Register
+from registration import RegisterHandler
+from subscribe import SubscrHandler
 
 class j2jComponent(TwilixComponent):
     def __init__(self, version, config, cJid):
@@ -22,12 +20,12 @@ class j2jComponent(TwilixComponent):
         self.VERSION = version
         self.startTime = None
 
-    def componentConnected(self, xs):
+    def init(self):
         self.startTime = time.time()
-        self.dispatcher = Dispatcher(xs, self.myjid)
         self.dispatcher.registerHandler((Presence, self))
         self.dispatcher.registerHandler((Message, self))
-        self.disco = disco.Disco(self.dispatcher)
+        self.dispatcher.registerHandler((SubscrHandler, self))
+        self.disco = Disco(self.dispatcher)
         self.version = ClientVersion(self.dispatcher,
                                     'j2j transport',
                                     self.VERSION, 'Linux')
