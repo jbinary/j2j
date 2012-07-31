@@ -1,6 +1,7 @@
 from twilix.register import RegisterQuery
 from twilix import fields
 from twilix import errors
+from twilix.stanzas import Presence
 
 from dbase import UserBase
 
@@ -30,9 +31,11 @@ class RegisterHandler(RegisterQuery):
                 raise errors.RegistrationRequiredException
             self.base.addUser(str(from_.userhost()),
                               self.username, self.password)
-            reply = RegisterHandler(parent=self.makeResult())
-            reply.username, reply.password = self.username, self.password
-            return reply
+            reply1 = RegisterHandler(parent=self.makeResult())
+            reply1.username, reply1.password = self.username, self.password
+            reply2 = Presence(from_=self.iq.to,
+                              to=from_.bare(), type_='subscribe')
+            return reply1, reply2
         else:
             if self.aremove:
                 self.base.removeUser(str(from_.userhost()))
