@@ -14,11 +14,5 @@ class UserBase(object):
     def keyInBase(self, key):
         return key in self.base.keys()
 
-    def userInBase(self, user):
-        for u in self.base.values():
-            if u[0] == user:
-                return True
-        return False
-
     def getUser(self, key):
         return self.base[key]
