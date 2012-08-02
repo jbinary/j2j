@@ -13,6 +13,7 @@ from twilix.register import Register
 from registration import RegisterHandler
 from subscribe import SubscrHandler, PresenceHandler
 from dbase import UserBase
+from j2jClient import ClientPool
 
 class j2jComponent(TwilixComponent):
     def __init__(self, version, config, cJid, basepath):
@@ -21,6 +22,7 @@ class j2jComponent(TwilixComponent):
         self.VERSION = version
         self.startTime = None
         self.dbase = UserBase(basepath)
+        self.pool = ClientPool()
 
     def init(self):
         self.startTime = time.time()

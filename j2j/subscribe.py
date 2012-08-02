@@ -6,7 +6,7 @@ from twilix.stanzas import Presence
 from twilix.base.myelement import EmptyStanza
 from twilix import errors
 
-from j2jClient import j2jClient, ClientPool
+from j2jClient import j2jClient
 from j2jClient import WrongClientException, DuplicateClientsException
 
 class SubscrHandler(Presence):
@@ -31,10 +31,6 @@ class SubscrHandler(Presence):
 
 class PresenceHandler(Presence):
 
-    def __init__(self, *args, **kwargs):
-        super(PresenceHandler, self).__init__(*args, **kwargs)
-        self.pool = ClientPool()
-
     def clean_from_(self, value):
         key = str(value.userhost())
         try:
@@ -46,12 +42,12 @@ class PresenceHandler(Presence):
 
     @inlineCallbacks
     def availableHandler(self):
-        if self.username in self.pool.pool.keys():
+        if self.username in self.host.pool.pool.keys():
             returnValue(self.get_reply())
         client = j2jClient(self.username)
         try:
             yield client.connect(self.password)
-            self.pool.addClient(self.username, client)
+            self.host.pool.addClient(self.username, client)
         except DNSLookupError:
             raise errors.NotAcceptableException
         except SASLAuthError:
@@ -64,7 +60,7 @@ class PresenceHandler(Presence):
 
     def unavailableHandler(self):
         try:
-            self.pool.removeClient(self.username)
+            self.host.pool.removeClient(self.username)
         except WrongClientException:
             pass
         reply = self.get_reply()
