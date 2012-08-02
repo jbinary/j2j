@@ -11,20 +11,23 @@ from twilix.dispatcher import Dispatcher
 from twilix.vcard import VCard, VCardQuery
 from twilix.register import Register
 from registration import RegisterHandler
-from subscribe import SubscrHandler
+from subscribe import SubscrHandler, PresenceHandler
+from dbase import UserBase
 
 class j2jComponent(TwilixComponent):
-    def __init__(self, version, config, cJid):
+    def __init__(self, version, config, cJid, basepath):
         TwilixComponent.__init__(self, cJid)
         self.config = config
         self.VERSION = version
         self.startTime = None
+        self.dbase = UserBase(basepath)
 
     def init(self):
         self.startTime = time.time()
         self.dispatcher.registerHandler((Presence, self))
         self.dispatcher.registerHandler((Message, self))
         self.dispatcher.registerHandler((SubscrHandler, self))
+        self.dispatcher.registerHandler((PresenceHandler, self))
         self.disco = Disco(self.dispatcher)
         self.version = ClientVersion(self.dispatcher,
                                     'j2j transport',
@@ -40,3 +43,6 @@ Jabber to jabber gateway')
         self.register.init((RegisterHandler, self), self.disco)
         self.disco.init()
         print 'Connected!'
+
+    def componentDisconnected(self):
+        self.dbase.close()
