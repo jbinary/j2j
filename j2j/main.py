@@ -10,7 +10,7 @@ import sys
 
 from twisted.internet import reactor
 
-import j2j
+from j2j import j2jComponent
 
 def info():
     print('\nUsage: main PATH\n\n\tPATH: the path to the configuration \
@@ -26,10 +26,11 @@ def main(conf):
         password = config.get('component', 'password')
         host = config.get('component', 'host')
         port = config.get('component', 'port')
+        dbase = config.get('component', 'basepath')
     except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
         print('\n Wrong configuration file\n')
         return
-    c = j2j.j2jComponent(version, config, jid)
+    c = j2jComponent(version, config, jid, dbase)
     c.connect(port, password, host)
     reactor.run() 
 
