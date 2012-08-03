@@ -1,4 +1,5 @@
 from twisted.internet import reactor
+
 from twilix.register import RegisterQuery
 from twilix import fields
 from twilix import errors
@@ -40,9 +41,10 @@ class RegisterHandler(RegisterQuery):
                 return self.makeResult()
             user, passw = self.host.dbase.getUser(str(from_.userhost()))
             if self.username != user:
-                for client in self.host.pool.pool.values():
-                    client.xmlstream.sendFooter()
-                    reactor.callLater(1, client.connector.disconnect)
+                for u in self.host.pool.pool.keys():
+                    if u.bare() == from_.bare():
+                        self.host.pool.pool[u].disconnect()
+                        self.host.pool.removeClient(u)
             self.host.dbase.addUser(str(from_.userhost()),
                               self.username, self.password)
             return self.makeResult()
