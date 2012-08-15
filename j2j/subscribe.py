@@ -1,6 +1,6 @@
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.words.protocols.jabber.sasl import SASLAuthError
-from twisted.internet.error import DNSLookupError
+from twisted.internet.error import DNSLookupError, TimeoutError
 
 from twilix.stanzas import Presence
 from twilix.base.myelement import EmptyStanza
@@ -43,30 +43,39 @@ class PresenceHandler(Presence):
 
     @inlineCallbacks
     def availableHandler(self):
+        isConnected = False
         name = u'%s/%s' % (self.guestJID, self.from_.resource)
         jid = internJID(name)
         if jid in self.host.pool.pool.keys():
             returnValue(EmptyStanza())
         try:
-            client = j2jClient(name)
+            client = j2jClient(self.host.dispatcher, name)
             self.host.pool.addClient(self.from_, client)
             yield client.connect(self.guestPass)
+            client.hostJID = self.from_
+            client.transportJID = self.host.myjid
+            reply = self.get_reply()
+            reply.to = client.myjid
+            self.dispatcher.send(reply)
+            isConnected = True
         except DNSLookupError:
-            self.host.pool.removeClient(self.from_)
             raise errors.NotAcceptableException
         except SASLAuthError:
-            self.host.pool.removeClient(self.from_)
             raise errors.NotAuthorizedException
+        except TimeoutError:
+            raise errors.RemoteServerTimeoutException
         except DuplicateClientsException:
             pass
         except Exception:
-            self.host.pool.removeClient(self.from_)
-            raise errors.InternalServerErrorException
+            raise
+        finally:
+            if not isConnected:
+                self.host.pool.removeClient(self.from_)
         returnValue(self.get_reply())
 
-        def unavailableHandler(self):
-            for u in self.host.pool.pool.keys():
-                if u.bare() == self.from_.bare():
-                    self.host.pool.pool[u].disconnect()
-                    self.host.pool.removeClient(u)
-            return EmptyStanza()
+    def unavailableHandler(self):
+        for u in self.host.pool.pool.keys():
+            if u.bare() == self.from_.bare():
+                self.host.pool.pool[u].disconnect()
+                self.host.pool.removeClient(u)
+        return EmptyStanza()
