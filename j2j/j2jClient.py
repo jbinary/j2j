@@ -31,7 +31,7 @@ class ClientPool(object):
 class HandlerMixIn(object):
 
     def anyHandler(self):
-        to = self.host.hostJID
+        to = self.host.ownerJID
         from_ = MyJID.escaped(self.from_.full(), self.host.transportJID)
         reply = self
         reply.from_ = from_
@@ -45,33 +45,29 @@ class IqHandler(HandlerMixIn, Iq):
 class MessageHandler(HandlerMixIn, Message):
     pass
 
-class PresenceHandler(Presence):
-
-    def availableHandler(self):
-        # from = dtest.hidevlab.com
-        # to = transport_test@jabb3r.org/res
-        # redirect answer to dmitry@hidevlab.com
-        to = self.host.hostJID
-        from_ = MyJID.escaped(self.to.full(), self.host.transportJID)
-        reply = self.get_reply()
-        reply.to = to
-        reply.from_ = from_
-        self.host.transportDispatcher.send(reply)
-        return EmptyStanza()
-
 class j2jClient(TwilixClient):
 
-    def __init__(self, transportDispatcher, *args, **kwargs):
+    def __init__(self, initialPresence, *args, **kwargs):
         super(j2jClient, self).__init__(*args, **kwargs)
-        self.transportDispatcher = transportDispatcher
+        self.transportDispatcher = initialPresence.host.dispatcher
+        self.ownerJID = initialPresence.from_
+        self.transportJID = initialPresence.host.myjid
+        self.ownerStatus = None
+        self.ownerPriority = None
+        if initialPresence.status is not None and \
+           initialPresence.priority is not None:
+            self.ownerStatus = initialPresence.status
+            self.ownerPriority = initialPresence.priority
 
     def init(self):
         self.f.maxRetries = 0
-        self.hostJID = None
-        self.transportJID = None
         self.dispatcher.registerHandler((IqHandler, self))
         self.dispatcher.registerHandler((MessageHandler, self))
-        self.dispatcher.registerHandler((PresenceHandler, self))
+        if self.ownerPriority is not None and self.ownerStatus is not None:
+            reply = Presence()
+            reply.status = self.ownerStatus
+            reply.priority = self.ownerPriority
+            self.dispatcher.send(reply)
 
     def disconnect(self):
         self.xmlstream.sendFooter()
