@@ -1,9 +1,12 @@
 from twilix.stanzas import Query, MyIq, Iq
-from twilix.disco import Feature
 from twilix import fields, errors
+from twilix.disco import Feature
+from twilix.jid import MyJID
+
+xmlns = 'jabber:iq:gateway'
 
 class GatewayQuery(Query):
-    elementUri = 'jabber::iq::gateway'
+    elementUri = xmlns
 
     desc = fields.StringNode('desc', required=False)
     prompt = fields.StringNode('prompt', required=False)
@@ -19,7 +22,12 @@ class MyGatewayQuery(GatewayQuery):
         return iq
 
     def setHandler(self):
-        raise errors.BadRequestException()
+        escapedJID = MyJID.escaped(self.prompt, self.iq.to)
+        iq = self.iq.makeResult()
+        query = GatewayQuery(parent=iq)
+        jid = query.addElement('jid')
+        jid.addChild(escapedJID.full())
+        return iq
 
 class ClientGateway(object):
     def __init__(self, dispatcher, desc=None, prompt=None):
@@ -27,12 +35,8 @@ class ClientGateway(object):
         self.desc = desc
         self.prompt = prompt
 
-    def init(self, disco=None, handlers=None):
+    def init(self, disco=None):
         self.dispatcher.registerHandler((MyGatewayQuery, self))
-        if handlers is None:
-            handlers = ()
-        for handler, host in handlers:
-            self.dispatcher.registerHandler((handler, host))
 
         if disco is not None:
-            disco.root_info.addFeatures(Feature(var='jabber::iq::gateway'))
+            disco.root_info.addFeatures(Feature(var=xmlns))
