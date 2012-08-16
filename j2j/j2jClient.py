@@ -22,6 +22,12 @@ class ClientPool(object):
         else:
             raise DuplicateClientsException
 
+    def getClient(self, jid):
+        if jid in self.pool.keys():
+            return self.pool[jid]
+        else:
+            raise WrongClientException
+
     def removeClient(self, jid):
         if jid in self.pool.keys():
             self.pool.pop(jid)
@@ -59,15 +65,18 @@ class j2jClient(TwilixClient):
             self.ownerStatus = initialPresence.status
             self.ownerPriority = initialPresence.priority
 
-    def init(self):
-        self.f.maxRetries = 0
-        self.dispatcher.registerHandler((IqHandler, self))
-        self.dispatcher.registerHandler((MessageHandler, self))
+    def sendStatus(self):
         if self.ownerPriority is not None and self.ownerStatus is not None:
             reply = Presence()
             reply.status = self.ownerStatus
             reply.priority = self.ownerPriority
             self.dispatcher.send(reply)
+
+    def init(self):
+        self.f.maxRetries = 0
+        self.dispatcher.registerHandler((IqHandler, self))
+        self.dispatcher.registerHandler((MessageHandler, self))
+        self.sendStatus()
 
     def disconnect(self):
         self.xmlstream.sendFooter()
