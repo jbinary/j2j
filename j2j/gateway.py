@@ -10,6 +10,7 @@ class GatewayQuery(Query):
 
     desc = fields.StringNode('desc', required=False)
     prompt = fields.StringNode('prompt', required=False)
+    jid = fields.StringNode('jid', required=False)
 
 class MyGatewayQuery(GatewayQuery):
     parentClass = MyIq
@@ -24,9 +25,7 @@ class MyGatewayQuery(GatewayQuery):
     def setHandler(self):
         escapedJID = MyJID.escaped(self.prompt, self.iq.to)
         iq = self.iq.makeResult()
-        query = GatewayQuery(parent=iq)
-        jid = query.addElement('jid')
-        jid.addChild(escapedJID.full())
+        query = GatewayQuery(jid=escapedJID, parent=iq)
         return iq
 
 class ClientGateway(object):
@@ -34,6 +33,7 @@ class ClientGateway(object):
         self.dispatcher = dispatcher
         self.desc = desc
         self.prompt = prompt
+        self.jid = None
 
     def init(self, disco=None):
         self.dispatcher.registerHandler((MyGatewayQuery, self))
