@@ -49,14 +49,9 @@ class PresenceHandler(Presence):
         if jid in self.host.pool.pool.keys():
             returnValue(EmptyStanza())
         try:
-            client = j2jClient(self.host.dispatcher, name)
+            client = j2jClient(self, name)
             self.host.pool.addClient(self.from_, client)
             yield client.connect(self.guestPass)
-            client.hostJID = self.from_
-            client.transportJID = self.host.myjid
-            reply = self.get_reply()
-            reply.to = client.myjid
-            self.dispatcher.send(reply)
             isConnected = True
         except DNSLookupError:
             raise errors.NotAcceptableException
