@@ -3,7 +3,7 @@ from twilix.disco import Feature
 from twilix import fields, errors
 
 class GatewayQuery(Query):
-    elementUri - 'jabber::iq::gateway'
+    elementUri = 'jabber::iq::gateway'
 
     desc = fields.StringNode('desc', required=False)
     prompt = fields.StringNode('prompt', required=False)
