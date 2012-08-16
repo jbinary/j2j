@@ -47,6 +47,13 @@ class PresenceHandler(Presence):
         name = u'%s/%s' % (self.guestJID, self.from_.resource)
         jid = internJID(name)
         if jid in self.host.pool.pool.keys():
+            client = self.host.pool.getClient(jid)
+            if client.ownerPriority != self.priority:
+                client.ownerPriority = self.priority
+                if client.ownerStatus != self.status:
+                    client.ownerStatus = self.status
+                self.host.pool.addClient(jid, client)
+                client.sendStatus()
             returnValue(EmptyStanza())
         try:
             client = j2jClient(self, name)
