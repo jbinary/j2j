@@ -14,6 +14,7 @@ from registration import RegisterHandler
 from subscribe import SubscrHandler, PresenceHandler
 from dbase import UserBase
 from j2jClient import ClientPool
+from gateway import ClientGateway
 
 class j2jComponent(TwilixComponent):
     def __init__(self, version, config, cJid, basepath):
@@ -43,6 +44,11 @@ Jabber to jabber gateway')
         self.vcard.init(self.disco)
         self.register = Register(self.dispatcher)
         self.register.init((RegisterHandler, self), self.disco)
+        self.gateway = ClientGateway(self.dispatcher,
+                                     'Please enter the Jabber Screen Name of \
+the person you would like to contact',
+                                     'Contact ID')
+        self.gateway.init(self.disco)
         self.disco.init()
         print 'Connected!'
 
