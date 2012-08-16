@@ -10,7 +10,7 @@ class GatewayQuery(Query):
 
     desc = fields.StringNode('desc', required=False)
     prompt = fields.StringNode('prompt', required=False)
-    jid = fields.StringNode('jid', required=False)
+    jid = fields.JidNode('jid', required=False)
 
 class MyGatewayQuery(GatewayQuery):
     parentClass = MyIq
