@@ -53,30 +53,26 @@ class MessageHandler(HandlerMixIn, Message):
 
 class j2jClient(TwilixClient):
 
-    def __init__(self, initialPresence, *args, **kwargs):
+    def __init__(self, initialPresence, transportDispatcher, *args, **kwargs):
         super(j2jClient, self).__init__(*args, **kwargs)
-        self.transportDispatcher = initialPresence.host.dispatcher
+        self.transportDispatcher = transportDispatcher
         self.ownerJID = initialPresence.from_
         self.transportJID = initialPresence.host.myjid
-        self.ownerStatus = None
-        self.ownerPriority = None
-        if initialPresence.status is not None and \
-           initialPresence.priority is not None:
-            self.ownerStatus = initialPresence.status
-            self.ownerPriority = initialPresence.priority
+        self.presence = initialPresence
 
-    def sendStatus(self):
-        if self.ownerPriority is not None and self.ownerStatus is not None:
-            reply = Presence()
-            reply.status = self.ownerStatus
-            reply.priority = self.ownerPriority
-            self.dispatcher.send(reply)
+    def sendStatus(self, initialPresence):
+        reply = Presence()
+        reply.status = initialPresence.status
+        reply.priority = initialPresence.priority
+        reply.show = initialPresence.show
+        self.dispatcher.send(reply)
 
     def init(self):
         self.f.maxRetries = 0
         self.dispatcher.registerHandler((IqHandler, self))
         self.dispatcher.registerHandler((MessageHandler, self))
-        self.sendStatus()
+        self.sendStatus(self.presence)
+        self.presence = None
 
     def disconnect(self):
         self.xmlstream.sendFooter()

@@ -48,15 +48,11 @@ class PresenceHandler(Presence):
         jid = internJID(name)
         if jid in self.host.pool.pool.keys():
             client = self.host.pool.getClient(jid)
-            if client.ownerPriority != self.priority:
-                client.ownerPriority = self.priority
-                if client.ownerStatus != self.status:
-                    client.ownerStatus = self.status
-                self.host.pool.addClient(jid, client)
-                client.sendStatus()
+            self.host.pool.addClient(jid, client)
+            client.sendStatus(self)
             returnValue(EmptyStanza())
         try:
-            client = j2jClient(self, name)
+            client = j2jClient(self, self.host.dispatcher, name)
             self.host.pool.addClient(self.from_, client)
             yield client.connect(self.guestPass)
             isConnected = True
