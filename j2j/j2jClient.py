@@ -72,7 +72,7 @@ class j2jClient(TwilixClient):
         self.dispatcher.registerHandler((IqHandler, self))
         self.dispatcher.registerHandler((MessageHandler, self))
         self.sendStatus(self.presence)
-        self.presence = None
+        del self.presence
 
     def disconnect(self):
         self.xmlstream.sendFooter()
