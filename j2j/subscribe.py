@@ -35,7 +35,7 @@ class PresenceHandler(Presence):
     def clean_from_(self, value):
         key = str(value.userhost())
         try:
-            guestJID, guestPass = self.host.dbase.getUser(key)
+            guestJID, guestPass = self.host.dbase.getGuestJID(key)
         except KeyError:
             raise errors.RegistrationRequiredException
         self.guestJID, self.guestPass = guestJID, guestPass
