@@ -1,7 +1,5 @@
 #!/usr/bin/python
-# Google Weather Jabber-service
-#
-# copyright 2011 Verzakov Maxim aka xam_vz 
+# Jabber to Jabber gateway
 #
 # License: GPL-v3
 #
@@ -27,10 +25,16 @@ def main(conf):
         host = config.get('component', 'host')
         port = config.get('component', 'port')
         dbase = config.get('component', 'basepath')
-    except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        dbaseType = config.get('component', 'basetype')
+    except (ConfigParser.NoSectionEandrror, ConfigParser.NoOptionError):
         print('\n Wrong configuration file\n')
         return
-    c = j2jComponent(version, config, jid, dbase)
+    finally:
+        if dbaseType != 'shelve' and dbaseType != 'sqlite':
+            print dbaseType
+            print('\n Wrong data base type! Try \'shelve\' or \'sqlite\'\n')
+            return
+    c = j2jComponent(version, config, jid, dbase, dbaseType)
     c.connect(port, password, host)
     reactor.run() 
 

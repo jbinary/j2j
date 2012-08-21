@@ -4,3 +4,4 @@ host = ;hostname
 port = ;port number
 password = ;password
 basepath = ;path to the user database
+basetype = ;MUST be shelve or sqlite

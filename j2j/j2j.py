@@ -12,17 +12,19 @@ from twilix.vcard import VCard, VCardQuery
 from twilix.register import Register
 from registration import RegisterHandler
 from subscribe import SubscrHandler, PresenceHandler
-from dbase import UserBase
 from j2jClient import ClientPool
 from gateway import ClientGateway
 
 class j2jComponent(TwilixComponent):
-    def __init__(self, version, config, cJid, basepath):
+    def __init__(self, version, config, cJid, basepath, basetype):
         TwilixComponent.__init__(self, cJid)
         self.config = config
         self.VERSION = version
         self.startTime = None
-        self.dbase = UserBase(basepath)
+        self.basetype = basetype
+        _tmp = __import__('%sBase' % basetype, globals(), locals(),
+                                                    ['UserBase'], -1)
+        self.dbase = _tmp.UserBase(basepath)
         self.pool = ClientPool()
 
     def init(self):
@@ -51,3 +53,7 @@ the person you would like to contact',
         self.gateway.init(self.disco)
         self.disco.init()
         print 'Connected!'
+
+    def componentDisconnected(self):
+        if self.basetype == 'shelve':
+            self.dbase.close()
