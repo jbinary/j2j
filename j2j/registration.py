@@ -13,8 +13,8 @@ class RegisterHandler(RegisterQuery):
     def getHandler(self):
         from_ = self.iq.from_
         reply = RegisterHandler(parent=self.makeResult())
-        if self.host.dbase.keyInBase(str(from_.userhost())):
-            reply.username, reply.password = self.host.dbase.getUser(
+        if self.host.dbase.userInBase(str(from_.userhost())):
+            reply.username, reply.password = self.host.dbase.getGuestJID(
                                                         str(from_.userhost()))
             reply.registered = ''
             return reply
@@ -25,7 +25,7 @@ class RegisterHandler(RegisterQuery):
 
     def setHandler(self):
         from_ = self.iq.from_
-        if not self.host.dbase.keyInBase(str(from_.userhost())):
+        if not self.host.dbase.userInBase(str(from_.userhost())):
             if self.aremove:
                 raise errors.RegistrationRequiredException
             self.host.dbase.addUser(str(from_.userhost()),
@@ -39,13 +39,13 @@ class RegisterHandler(RegisterQuery):
             if self.aremove:
                 self.host.dbase.removeUser(str(from_.userhost()))
                 return self.makeResult()
-            user, passw = self.host.dbase.getUser(str(from_.userhost()))
+            user, passw = self.host.dbase.getGuestJID(str(from_.userhost()))
             if self.username != user:
                 for u in self.host.pool.pool.keys():
                     if u.bare() == from_.bare():
                         self.host.pool.pool[u].disconnect()
                         self.host.pool.removeClient(u)
-            self.host.dbase.addUser(str(from_.userhost()),
-                              self.username, self.password)
+            self.host.dbase.updateUser(str(from_.userhost()),
+                                             self.username, self.password)
             return self.makeResult()
         return self.makeResult()
