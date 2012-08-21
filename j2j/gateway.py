@@ -7,6 +7,7 @@ xmlns = 'jabber:iq:gateway'
 
 class GatewayQuery(Query):
     elementUri = xmlns
+    result_class = 'self'
 
     desc = fields.StringNode('desc', required=False)
     prompt = fields.StringNode('prompt', required=False)
@@ -40,3 +41,12 @@ class ClientGateway(object):
 
         if disco is not None:
             disco.root_info.addFeatures(Feature(var=xmlns))
+
+    def translateAddress(self, clientJID, gatewayJID, from_=None):
+        if from_ is None:
+            from_ = self.dispatcher.myjid
+        query = GatewayQuery(host=self,
+                             prompt=clientJID,
+                             parent=Iq(type_='set', to=gatewayJID, from_=from_))
+        self.dispatcher.send(query.iq)
+        return query.iq.deferred
