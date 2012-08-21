@@ -51,6 +51,3 @@ the person you would like to contact',
         self.gateway.init(self.disco)
         self.disco.init()
         print 'Connected!'
-
-    def componentDisconnected(self):
-        self.dbase.close()
