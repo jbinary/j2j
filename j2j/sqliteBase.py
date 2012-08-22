@@ -1,7 +1,9 @@
 import sqlite3
 
 class UserBase(object):
-
+    """
+    Class describes interaction with sqlite database.
+    """
     def __init__(self, path):
         self.base = sqlite3.connect(path)
         c = self.base.cursor()

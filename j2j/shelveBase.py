@@ -1,6 +1,9 @@
 import shelve
 
 class UserBase(object):
+    """
+    Class describes interaction with shelve data base
+    """
     def __init__(self, path):
         self.base = shelve.open(path)
 

@@ -11,7 +11,10 @@ from j2jClient import j2jClient
 from j2jClient import WrongClientException, DuplicateClientsException
 
 class SubscrHandler(Presence):
-
+    """
+    Extends Presence class.
+    Defines handlers for subscribe queries.
+    """
     def probeHandler(self):
         reply = self.get_reply()
         reply.to = reply.to.bare()
@@ -31,8 +34,14 @@ class SubscrHandler(Presence):
         return reply
 
 class PresenceHandler(Presence):
-
+    """
+    Extends Presence class.
+    Defines handlers for presence queries.
+    """
     def clean_from_(self, value):
+        """
+        Method which is parsing from_ attribute.
+        """
         key = str(value.userhost())
         try:
             guestJID, guestPass = self.host.dbase.getGuestJID(key)

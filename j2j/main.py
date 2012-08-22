@@ -34,7 +34,7 @@ def main(conf):
             print dbaseType
             print('\n Wrong data base type! Try \'shelve\' or \'sqlite\'\n')
             return
-    c = j2jComponent(version, config, jid, dbase, dbaseType)
+    c = j2jComponent(version, jid, dbase, dbaseType)
     c.connect(port, password, host)
     reactor.run() 
 

@@ -6,13 +6,22 @@ from twilix.base.myelement import EmptyStanza
 from twilix.jid import MyJID
 
 class WrongClientException(Exception):
+    """
+    Raises when trying to access to unknown client.
+    """
     pass
 
 class DuplicateClientsException(Exception):
+    """
+    Raises when trying to add existing client (or client with the same
+    master jid)
+    """
     pass
 
 class ClientPool(object):
-
+    """
+    Pool with the keys type of MyJID and the values type of j2jClient
+    """
     def __init__(self):
         self.pool = {}
 
@@ -35,7 +44,10 @@ class ClientPool(object):
             raise WrongClientException
 
 class HandlerMixIn(object):
-
+    """
+    MixIn class which is redirecting stanzas from guest jid
+    to the master jid.
+    """
     def anyHandler(self):
         to = self.host.ownerJID
         from_ = MyJID.escaped(self.from_.full(), self.host.transportJID)
@@ -52,7 +64,10 @@ class MessageHandler(HandlerMixIn, Message):
     pass
 
 class j2jClient(TwilixClient):
-
+    """
+    Class describes jabber-client with guest jid based on
+    master jid duplicating status, priority and show.
+    """
     def __init__(self, initialPresence, transportDispatcher, *args, **kwargs):
         super(j2jClient, self).__init__(*args, **kwargs)
         self.transportDispatcher = transportDispatcher

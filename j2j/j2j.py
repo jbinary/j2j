@@ -16,8 +16,22 @@ from j2jClient import ClientPool
 from gateway import ClientGateway
 
 class j2jComponent(TwilixComponent):
-    def __init__(self, version, config, cJid, basepath, basetype):
-        TwilixComponent.__init__(self, cJid)
+    """
+    Master class for the jabber-to-jabber service.
+    """
+    def __init__(self, version, jid, basepath, basetype):
+        """
+        Sets info about transport.
+        
+        :param version: version of your transport.
+        
+        :param jid: jid of your transport.
+        
+        :param basepath: path to your users database.
+        
+        :param basetype: type of your users database
+        """
+        TwilixComponent.__init__(self, jid)
         self.config = config
         self.VERSION = version
         self.startTime = None
@@ -28,6 +42,9 @@ class j2jComponent(TwilixComponent):
         self.pool = ClientPool()
 
     def init(self):
+        """
+        Method initializing all needed services and handlers.
+        """
         self.startTime = time.time()
         self.dispatcher.registerHandler((Presence, self))
         self.dispatcher.registerHandler((Message, self))
@@ -55,5 +72,9 @@ the person you would like to contact',
         print 'Connected!'
 
     def componentDisconnected(self):
+        """
+        If type of your database is 'shelve', this method will close
+        your database properly.
+        """
         if self.basetype == 'shelve':
             self.dbase.close()
