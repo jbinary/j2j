@@ -49,7 +49,7 @@ class MyGatewayQuery(GatewayQuery):
         query = GatewayQuery(desc=self.host.desc,
                              prompt=self.host.prompt,
                              parent=iq)
-        return iq
+        return query
 
     def setHandler(self):
         """
@@ -61,7 +61,7 @@ class MyGatewayQuery(GatewayQuery):
         escapedJID = MyJID.escaped(self.prompt, self.iq.to)
         iq = self.iq.makeResult()
         query = GatewayQuery(jid=escapedJID, parent=iq)
-        return iq
+        return query
 
 class ClientGateway(object):
     """
